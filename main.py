@@ -17,20 +17,12 @@ app = Flask(__name__)
 
 class Sections:
     def __init__(self, text):
-        first = pp.Word("\n\nincline" + pp.nums)
-        numbersAndLettersAndSpaces = pp.Word(pp.alphanums + " " + ":" + "\n" + "." + ",")
-        last = pp.Word("\n--------------------------------------------------------------------------------")
-        identifier = pp.OneOrMore(pp.Combine(first + numbersAndLettersAndSpaces + last) ^ pp.Combine(
-            pp.Word("\n--------------------------------------------------------------------------------")))
+        self.sections = {}
+        for var in range(1, 9):
+            inclineSectionRule = re.findall(r'incline0'+str(var)+'([\s\S]*?)--------------------------------------------------------------------------------',text)
+            self.sections["incline0"+str(var)] = inclineSectionRule
 
-        self.sections = self.test(text, identifier)
-
-    def test(self, text, identifier):
-        try:
-            result = identifier.parseString(text)
-            return result
-        except pp.ParseException as x:
-            print "  No match: {0}".format(str(x))
+        print self.sections
 
 
 class Data:
@@ -117,13 +109,9 @@ def parse():
     }
 
     to_be_parse = request.get_data()
-
     to_be_parse = cutit(to_be_parse, 211)
-
-    to_be_parse2 = request.form.to_dict()
-    '''to_be_parse2 = ast.literal_eval(json.dumps(to_be_parse2))['file']'''
     sections = Sections(to_be_parse).sections
-    print sections
+
 
     '''print sections'''
     '''For each section found on the file we extract it's
