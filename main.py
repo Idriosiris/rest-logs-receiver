@@ -99,6 +99,8 @@ class Data:
 
 @app.route('/show', methods=['POST'])
 def parse():
+    def cutit(s, n):
+        return s[n:]
     '''This dictionary holds a watch on what nodes are present in this report.
     By default all the nodes are set to 0 [not present]'''
     toBeReported = {
@@ -114,12 +116,16 @@ def parse():
         'incline10': 0
     }
 
-    to_be_parse = request.form.to_dict()
-    '''to_be_parse = ast.literal_eval(json.dumps(to_be_parse))['file']'''
+    to_be_parse = request.get_data()
+
+    to_be_parse = cutit(to_be_parse, 211)
+
+    to_be_parse2 = request.form.to_dict()
+    '''to_be_parse2 = ast.literal_eval(json.dumps(to_be_parse2))['file']'''
     sections = Sections(to_be_parse).sections
+    print sections
 
-    print to_be_parse
-
+    '''print sections'''
     '''For each section found on the file we extract it's
     data and put it in the toBeReported dictionary '''
     '''for section in sections:
