@@ -22,7 +22,8 @@ class Sections:
             inclineSectionRule = re.findall(r'incline0'+str(var)+'([\s\S]*?)--------------------------------------------------------------------------------',text)
             self.sections["incline0"+str(var)] = inclineSectionRule
 
-        print self.sections
+        inclineSectionRule = re.findall(r'incline10([\s\S]*?)--------------------------------------------------------------------------------', text)
+        self.sections["incline10"] = inclineSectionRule
 
 
 class Data:
@@ -47,7 +48,7 @@ class Data:
         else:
             memoryStatsLine = re.search(r'Mem:(.+)\n', section).group()
             swapStatsLine = re.search(r'Swap:(.+)\n', section).group()
-            buffersAndCacheStatsLine = re.search(r'buffers\sand\scache:(.+)\n', section).group()
+            buffersAndCacheStatsLine = re.search(r'cache:(.+)\n', section).group()
             '''This stats are not used yet'''
             upTimeStats = re.search(r'\n(.+)\n-', section).group()
 
@@ -55,7 +56,7 @@ class Data:
             swapStatsArray = re.findall('\d+', swapStatsLine)
             buffersAndCacheStatsArray = re.findall('\d+', buffersAndCacheStatsLine)
 
-            self.sectionName = re.search(r'incline(\d+)', section).group()
+            self.sectionName = sectionName
 
             self.totalMemory = memoryStatsArray[0]
             self.usedMemory = memoryStatsArray[1]
@@ -93,47 +94,22 @@ class Data:
 def parse():
     def cutit(s, n):
         return s[n:]
-    '''This dictionary holds a watch on what nodes are present in this report.
-    By default all the nodes are set to 0 [not present]'''
-    toBeReported = {
-        'incline01': 0,
-        'incline02': 0,
-        'incline03': 0,
-        'incline04': 0,
-        'incline05': 0,
-        'incline06': 0,
-        'incline07': 0,
-        'incline08': 0,
-        'incline09': 0,
-        'incline10': 0
-    }
 
     to_be_parse = request.get_data()
     to_be_parse = cutit(to_be_parse, 211)
     sections = Sections(to_be_parse).sections
 
-
-    '''print sections'''
     '''For each section found on the file we extract it's
     data and put it in the toBeReported dictionary '''
-    '''for section in sections:
-        sectionData = Data(section)
-        toBeReported[sectionData.sectionName] = sectionData
-
-    for nodeName, section in toBeReported.items():
-        if section == 0:
-            section = Data('empty', nodeName)
-            section.reportTotalMemory()
-            section.reportUsedMemory()
-            section.reportFreeMemory()
-            section.reportSharedMemory()
-
+    for nodeName, section in sections.iteritems():
+        if not section:
+            sectionData = Data('empty', nodeName)
         else:
-            section.reportTotalMemory()
-            section.reportUsedMemory()
-            section.reportFreeMemory()
-            section.reportSharedMemory()
+            sectionData = Data(section[0], nodeName)
 
-    print toBeReported'''
+        sectionData.reportTotalMemory()
+        sectionData.reportUsedMemory()
+        sectionData.reportFreeMemory()
+        sectionData.reportSharedMemory()
 
     return 'done'
